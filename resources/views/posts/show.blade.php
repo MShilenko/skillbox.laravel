@@ -5,7 +5,7 @@
 @section('content')
 
 	<h3 class="pb-3 mb-4 font-italic border-bottom">
-	  {{ $post->title }}
+	  {{ $post->title }} | <a href="{{ route('posts.edit', ['post' => $post]) }}">Изменить</a>
 	</h3>
 
 	<div class="blog-post">
