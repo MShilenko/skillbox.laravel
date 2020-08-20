@@ -8,9 +8,10 @@
 	  {{ $post->title }} | <a href="{{ route('posts.edit', ['post' => $post]) }}">Изменить</a>
 	</h3>
 
+	@include('posts.tags', ['tags' => $post->tags])
+
 	<div class="blog-post">
 	  <p class="blog-post-meta">Опубликовано: {{ $post->created_at }}</p>
-
 	  {{ $post->text }}
 	</div><!-- /.blog-post -->
 

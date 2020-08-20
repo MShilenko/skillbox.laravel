@@ -13,7 +13,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        \View::composer('layout.sidebar', function($view) {
+            $view->with(['tagsCloud' => \App\Tag::tagsCloud()]);
+        });
     }
 
     /**

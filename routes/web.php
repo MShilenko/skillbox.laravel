@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/posts/tags/{tag}', 'TagsController@index')->name('tags.index');
+
 Route::resource('/posts', 'PostsController')->except(['index', 'store']);
 
 Route::get('/', 'PostsController@index')->name('main');

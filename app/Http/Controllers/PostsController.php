@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,7 @@ class PostsController extends Controller
 {
     public function index()
     {
-        return view('posts.index', ['posts' => Post::latest()->get()]);
+        return view('posts.index', ['posts' => Post::with('tags')->latest()->get()]);
     }
 
     /**
@@ -40,9 +41,13 @@ class PostsController extends Controller
 
     public function update(StoreAndUpdatePost $request, Post $post){
         $validated = $request->validated();
-        $validated['public'] = (bool) $request->input('public');
+        $validated['public'] = (bool) $request->public;
 
         $post->update($validated);
+
+        if ($request->tags){
+            $this->syncTags($post, $request->tags);
+        }
 
         return redirect(route('posts.show', ['post' => $post]));
     }
@@ -55,5 +60,14 @@ class PostsController extends Controller
         $post->delete();
 
         return redirect(route('main'));
+    }
+
+    public function syncTags(Post $post, string $tags)
+    {
+        foreach (explode(', ', $tags) as $tag) {
+            $tagsIds[] = Tag::firstOrCreate(['name' => $tag])->id;
+        }
+
+        $post->tags()->sync(array_values($tagsIds));
     }
 }

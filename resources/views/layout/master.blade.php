@@ -18,7 +18,7 @@
 
         @include('layout.text')
 
-        @include('layout.sidebar')
+        @include('layout.sidebar', ['tags' => App\Tag::all()])
 
       </div><!-- /.row -->
     </main><!-- /.container -->

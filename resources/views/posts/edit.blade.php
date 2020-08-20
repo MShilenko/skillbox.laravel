@@ -29,6 +29,10 @@
 	    <label for="inputText">Детальное описание</label>
 	    <textarea name="text" class="form-control" id="inputText" placeholder="Введите детальное описание">{{ old('text') ?? $post->text }}</textarea>
 	  </div>	  
+	  <div class="form-group">
+	    <label for="inputTags">Теги</label>
+	    <input name="tags" type="text" class="form-control" id="inputTags" placeholder="Добавьте теги" value="{{ old('tags') ?? $post->tags->pluck('name')->implode(', ') }}">
+	  </div>
 		<div class="form-check">
 	    <input name="public" type="checkbox" class="form-check-input" id="publicCheck" value="{{ old('public') ?? $post->public }}" {{ $post->public || old('public') ? ' checked' : '' }}>
 	    <label class="form-check-label" for="publicCheck">Опубликовано</label>
@@ -43,5 +47,7 @@
 		@method('DELETE')
 		<button type="submit" class="btn btn-danger mt-4">Удалить статью</button>
 	</form>
+
+	<hr>
 
 @endsection
