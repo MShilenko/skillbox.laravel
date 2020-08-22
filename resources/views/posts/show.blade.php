@@ -5,7 +5,11 @@
 @section('content')
 
 	<h3 class="pb-3 mb-4 font-italic border-bottom">
-	  {{ $post->title }} | <a href="{{ route('posts.edit', ['post' => $post]) }}">Изменить</a>
+	  {{ $post->title }}
+ 
+  	@can('update', $post)
+   		| <a href="{{ route('posts.edit', ['post' => $post]) }}">Изменить</a>
+   	@endcan
 	</h3>
 
 	@include('posts.tags', ['tags' => $post->tags])

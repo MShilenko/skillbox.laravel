@@ -4,7 +4,7 @@ namespace App;
 
 class Post extends \Illuminate\Database\Eloquent\Model
 {
-    protected $fillable = ['title', 'slug', 'excerpt', 'public', 'text', 'tags'];
+    protected $fillable = ['title', 'slug', 'excerpt', 'public', 'text', 'tags', 'user_id'];
 
     /**
      * Указываем по какому полю из БД выбирать записи по умолчанию

@@ -9,6 +9,15 @@ use Illuminate\Http\Request;
 
 class PostsController extends Controller
 {
+    public function __construct()
+    {
+        /** middleware "из коробки" - указывает что доступ к указанным методам разрешен только зарегистрированным пользователям */
+        $this->middleware('auth')->only(['store', 'update', 'edit', 'destroy', 'create']);
+
+        /** Политики: в данном случае указано что для всех, кроме перечисленных методов, должна происходить проверка указанная в \App\Policies\PostPolicy:update */
+        $this->middleware('can:update,post')->except(['index', 'show', 'create', 'store']);
+    }
+
     public function index()
     {
         return view('posts.index', ['posts' => Post::with('tags')->latest()->get()]);
@@ -33,13 +42,15 @@ class PostsController extends Controller
     {
         $validated = $request->validated();
         $validated['public'] = (bool) $request->input('public');
+        $validated['user_id'] = \Auth::id();
 
         Post::create($validated);
 
         return redirect(route('main'));
     }
 
-    public function update(StoreAndUpdatePost $request, Post $post){
+    public function update(StoreAndUpdatePost $request, Post $post)
+    {
         $validated = $request->validated();
         $validated['public'] = (bool) $request->public;
 

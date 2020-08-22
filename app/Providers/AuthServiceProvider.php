@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use App\Post;
+use App\Policies\PostPolicy;
+use Illuminate\Contracts\Auth\Access\Gate as AuthGate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -13,7 +16,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
-        // 'App\Model' => 'App\Policies\ModelPolicy',
+        Post::class => PostPolicy::class,
     ];
 
     /**
@@ -21,10 +24,15 @@ class AuthServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(AuthGate $gate)
     {
         $this->registerPolicies();
 
-        //
+        /** Метод позволяет определить правила до объявления политик. Здесь разрешен полный доступ для админа */
+        $gate->before(function($user) {
+            if ($user->isAdmin()) {
+                return true;
+            }
+        });
     }
 }
