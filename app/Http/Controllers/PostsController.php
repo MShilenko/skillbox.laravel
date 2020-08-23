@@ -44,7 +44,9 @@ class PostsController extends Controller
         $validated['public'] = (bool) $request->input('public');
         $validated['user_id'] = \Auth::id();
 
-        Post::create($validated);
+        $post = Post::create($validated);
+
+        flash('Статья успешно cоздана!');
 
         return redirect(route('main'));
     }
@@ -60,6 +62,8 @@ class PostsController extends Controller
             $this->syncTags($post, $request->tags);
         }
 
+        flash('Статья успешно обновлена!');
+
         return redirect(route('posts.show', ['post' => $post]));
     }
 
@@ -69,6 +73,8 @@ class PostsController extends Controller
 
     public function destroy(Post $post){
         $post->delete();
+
+        flash('Статья удалена!', 'warning');
 
         return redirect(route('main'));
     }

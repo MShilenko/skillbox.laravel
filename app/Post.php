@@ -2,7 +2,9 @@
 
 namespace App;
 
-class Post extends \Illuminate\Database\Eloquent\Model
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
 {
     protected $fillable = ['title', 'slug', 'excerpt', 'public', 'text', 'tags', 'user_id'];
 

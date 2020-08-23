@@ -41,6 +41,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get admin id
+     * @return integer
+     */
+    public static function getAdminId(): int
+    {
+        return self::ADMIN_ID;
+    }
+
+    /**
      * Check if user has admin rights
      * @return boolean
      */
