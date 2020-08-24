@@ -31,6 +31,7 @@ class StoreAndUpdatePost extends FormRequest
             'slug' => ['required', new Slug(), Rule::unique('posts', 'slug')->ignore($this->post)],
             'excerpt' => ['required', 'max:255'],
             'text' => ['required'],
+            'public' => [],
         ];
     }
 }

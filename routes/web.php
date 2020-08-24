@@ -15,8 +15,4 @@ Route::post('/admin/feedbacks', 'AppealsController@store')->name('admin.feedback
 
 Route::view('/about', 'about')->name('about');
 
-
-
 Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');

@@ -46,6 +46,10 @@ class PostsController extends Controller
 
         $post = Post::create($validated);
 
+        if ($request->tags){
+            $this->syncTags($post, $request->tags);
+        }
+
         flash('Статья успешно cоздана!');
 
         return redirect(route('main'));
@@ -54,7 +58,6 @@ class PostsController extends Controller
     public function update(StoreAndUpdatePost $request, Post $post)
     {
         $validated = $request->validated();
-        $validated['public'] = (bool) $request->public;
 
         $post->update($validated);
 
