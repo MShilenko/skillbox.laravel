@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
 use Illuminate\Http\Request;
@@ -50,6 +51,8 @@ class PostsController extends Controller
             $this->syncTags($post, $request->tags);
         }
 
+        push_all("Создана новая статья", "{$post->title} | {$post->created_at}");
+
         flash('Статья успешно cоздана!');
 
         return redirect(route('main'));
@@ -64,6 +67,8 @@ class PostsController extends Controller
         if ($request->tags){
             $this->syncTags($post, $request->tags);
         }
+
+        push_all("Изменена статья", "{$post->title} | {$post->updated_at}");
 
         flash('Статья успешно обновлена!');
 
