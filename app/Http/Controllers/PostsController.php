@@ -6,6 +6,7 @@ use App\Post;
 use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
 class PostsController extends Controller
@@ -21,7 +22,9 @@ class PostsController extends Controller
 
     public function index()
     {
-        return view('posts.index', ['posts' => Post::with('tags')->latest()->get()]);
+        $posts = Route::currentRouteName() === "admin.posts.index" ? Post::with('tags')->latest()->get() : Post::with('tags')->where('public', true)->latest()->get();
+
+        return view('posts.index', compact('posts'));
     }
 
     /**

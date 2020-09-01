@@ -2,16 +2,15 @@
 
 namespace App;
 
+use App\Post;
+use App\Role;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Post;
 
 class User extends Authenticatable
 {
     use Notifiable;
-
-    private const ADMIN_ID = 1;
 
     /**
      * The attributes that are mass assignable.
@@ -40,26 +39,22 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    /**
-     * Get admin id
-     * @return integer
-     */
-    public static function getAdminId(): int
+    public function posts()
     {
-        return self::ADMIN_ID;
+        return $this->hasMany(Post::class);
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
     }
 
     /**
-     * Check if user has admin rights
+     * Check if user has admin role
      * @return boolean
      */
     public function isAdmin(): bool
     {
-        return $this->id === self::ADMIN_ID;
-    }
-
-    public function posts()
-    {
-        return $this->hasMany(Post::class);
+        return $this->roles()->where('role', 'admin')->exists();
     }
 }

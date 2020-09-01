@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
+            AddAdminToUserTable::class,
             UsersTableSeeder::class,
             TagsTableSeeder::class,
             PostTableSeeder::class
