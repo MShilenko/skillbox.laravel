@@ -22,7 +22,15 @@ class PostsController extends Controller
 
     public function index()
     {
-        $posts = Route::currentRouteName() === "admin.posts.index" ? Post::with('tags')->latest()->get() : Post::with('tags')->where('public', true)->latest()->get();
+        /** Пример вывода только нужных полей из основной и связанной таблицы */
+        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+        $query = Post::select($rows)->with([
+            'tags' => function ($tag) {
+                $tag->select(['id', 'name']);
+            }
+        ])->latest();
+        /** Здесь также дописываем запрос в зависимости от роута с которого от пришел */
+        $posts = Route::currentRouteName() === "admin.posts.index" ? $query->get() : $query->where('public', true)->get($rows); 
 
         return view('posts.index', compact('posts'));
     }

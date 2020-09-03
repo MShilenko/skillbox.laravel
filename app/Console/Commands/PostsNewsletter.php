@@ -41,11 +41,9 @@ class PostsNewsletter extends Command
     public function handle()
     {
         $users = User::all();
-        $posts = \App\Post::where([
-                    ['created_at', '>=', $this->argument('start')],
-                    ['created_at', '<=', $this->argument('end')],
-                    ['public', true],
-                ])->get();
+        $posts = \App\Post::whereBetween('created_at', [$this->argument('start'), $this->argument('end')])
+            ->where('public', true)
+            ->get(['title', 'excerpt', 'created_at']);
 
         $users->map->notify(new PostsNewsletterNotification($posts, $this->argument('start'), $this->argument('end')));
         
@@ -53,3 +51,5 @@ class PostsNewsletter extends Command
         $this->line($posts);
     }
 }
+
+

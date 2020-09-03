@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Post extends Model
 {
@@ -16,6 +17,15 @@ class Post extends Model
         return 'slug';
     }
 
+    protected static function booted() 
+    {
+        static::updating(function ($post) {
+            $post->history()->attach(Auth::id(), [
+                'changes' => json_encode($post->getDirty()),
+            ]);
+        });
+    }
+
     public function tags()
     {
         return $this->belongsToMany(Tag::class);
@@ -23,6 +33,11 @@ class Post extends Model
 
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo(User::class);
+    }
+
+    public function history()
+    {
+        return $this->belongsToMany(User::class, 'post_histories')->withPivot(['changes'])->withTimestamps();
     }
 }
