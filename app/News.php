@@ -3,9 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
-class Post extends Model
+class News extends Model
 {
     protected $fillable = ['title', 'slug', 'excerpt', 'public', 'text', 'tags', 'user_id'];
 
@@ -17,15 +16,6 @@ class Post extends Model
         return 'slug';
     }
 
-    protected static function booted() 
-    {
-        static::updating(function ($post) {
-            $post->history()->attach(Auth::id(), [
-                'changes' => json_encode($post->getDirty()),
-            ]);
-        });
-    }
-
     public function tags()
     {
         return $this->morphToMany(Tag::class, 'taggable');
@@ -34,10 +24,5 @@ class Post extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function history()
-    {
-        return $this->belongsToMany(User::class, 'post_histories')->withPivot(['changes'])->withTimestamps();
     }
 }

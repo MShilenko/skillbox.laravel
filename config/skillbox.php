@@ -7,4 +7,7 @@ return [
         'id' => env('SKILLBOX_PUSHALL_ID'),
         'key' => env('SKILLBOX_PUSHALL_KEY'),
     ],
+    'posts' => [
+        'paginate' => 10,
+    ],
 ];

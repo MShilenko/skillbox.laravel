@@ -22,15 +22,16 @@ class PostsController extends Controller
 
     public function index()
     {
-        /** Пример вывода только нужных полей из основной и связанной таблицы */
+        /** Пример вывода только нужных полей из основной и связанной моделей */
         $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
         $query = Post::select($rows)->with([
             'tags' => function ($tag) {
                 $tag->select(['id', 'name']);
             }
         ])->latest();
+        $perPage = config('skillbox.posts.paginate');
         /** Здесь также дописываем запрос в зависимости от роута с которого от пришел */
-        $posts = Route::currentRouteName() === "admin.posts.index" ? $query->get() : $query->where('public', true)->get($rows); 
+        $posts = Route::currentRouteName() === "admin.posts.index" ? $query->paginate($perPage) : $query->where('public', true)->paginate($perPage); 
 
         return view('posts.index', compact('posts'));
     }
@@ -59,7 +60,7 @@ class PostsController extends Controller
         $post = Post::create($validated);
 
         if ($request->tags){
-            $this->syncTags($post, $request->tags);
+            Tag::syncWithModel($post, $request->tags);
         }
 
         push_all("Создана новая статья", "{$post->title} | {$post->created_at}");
@@ -76,7 +77,7 @@ class PostsController extends Controller
         $post->update($validated);
 
         if ($request->tags){
-            $this->syncTags($post, $request->tags);
+            Tag::syncWithModel($post, $request->tags);
         }
 
         push_all("Изменена статья", "{$post->title} | {$post->updated_at}");
@@ -96,14 +97,5 @@ class PostsController extends Controller
         flash('Статья удалена!', 'warning');
 
         return redirect(route('main'));
-    }
-
-    public function syncTags(Post $post, string $tags)
-    {
-        foreach (explode(', ', $tags) as $tag) {
-            $tagsIds[] = Tag::firstOrCreate(['name' => $tag])->id;
-        }
-
-        $post->tags()->sync(array_values($tagsIds));
     }
 }

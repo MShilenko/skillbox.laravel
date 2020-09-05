@@ -1,11 +1,10 @@
 <?php
 
-use App\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddUserIdToPosts extends Migration
+class CreateNewsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +13,15 @@ class AddUserIdToPosts extends Migration
      */
     public function up()
     {
-        Schema::table('posts', function (Blueprint $table) {
+        Schema::create('news', function (Blueprint $table) {
+            $table->id();
+            $table->string('title', 100);
+            $table->string('slug')->unique();
+            $table->string('excerpt', 255);
+            $table->string('text', 255);
+            $table->boolean('public')->default(false);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -26,8 +32,6 @@ class AddUserIdToPosts extends Migration
      */
     public function down()
     {
-        Schema::table('posts', function (Blueprint $table) {
-            $table->dropColumn(['user_id']);
-        });
+        Schema::dropIfExists('news');
     }
 }

@@ -12,7 +12,7 @@
    	@endcan
 	</h3>
 
-	@include('posts.tags', ['tags' => $post->tags])
+	@include('layout.tags', ['tags' => $post->tags])
 
 	<div class="blog-post">
 	  <p class="blog-post-meta">Опубликовано: {{ $post->created_at }}</p>

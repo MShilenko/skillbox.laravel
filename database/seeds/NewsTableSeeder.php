@@ -1,10 +1,10 @@
 <?php
 
-use App\Post;
+use App\News;
 use App\Tag;
 use Illuminate\Database\Seeder;
 
-class PostTableSeeder extends Seeder
+class NewsTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,7 +13,7 @@ class PostTableSeeder extends Seeder
      */
     public function run()
     {
-        factory(Post::class, 40)->create()->each(function ($post) {
+        factory(News::class, 40)->create()->each(function ($post) {
             $post->tags()->saveMany(Tag::inRandomOrder()->limit(rand(2, 6))->get());
         });
     }

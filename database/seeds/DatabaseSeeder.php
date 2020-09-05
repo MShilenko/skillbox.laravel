@@ -15,7 +15,8 @@ class DatabaseSeeder extends Seeder
             AddAdminToUserTable::class,
             UsersTableSeeder::class,
             TagsTableSeeder::class,
-            PostTableSeeder::class
+            PostTableSeeder::class,
+            NewsTableSeeder::class
         ]);
     }
 }

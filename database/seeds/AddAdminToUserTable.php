@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AddAdminToUserTable extends Seeder
 {
-    private const ROLE_ADMIN_ID = 1;
-
     /**
      * Run the database seeds.
      *
@@ -18,7 +16,7 @@ class AddAdminToUserTable extends Seeder
     public function run()
     {
         $user = new User();
-        $adminRole = Role::find(self::ROLE_ADMIN_ID);
+        $adminRole = Role::firstOrCreate(['role' => 'admin']);
 
         $user->name = 'Felix';
         $user->email = config('skillbox.my_email');
