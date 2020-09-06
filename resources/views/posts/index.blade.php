@@ -10,7 +10,7 @@
 
 	@foreach ($posts as $post)
 		<div class="blog-post">
-		  <h2 class="blog-post-title"><a href="{{ route('posts.show', ['post' => $post]) }}">{{ $post->title }}</a></h2>
+		  <h2 class="blog-post-title"><a href="{{ route($post->getTable() . '.show', ['post' => $post]) }}">{{ $post->title }}</a></h2>
 
 		  @include('layout.tags', ['tags' => $post->tags])
 

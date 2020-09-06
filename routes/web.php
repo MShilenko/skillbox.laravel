@@ -25,6 +25,8 @@ Route::get('/news/{news}', 'NewsController@show')->name('news.show');
 Route::get('/', 'PostsController@index')->name('main');
 Route::post('/', 'PostsController@store');
 
+Route::post('/comments/store', 'CommentsController@store')->name('comments.store')->middleware('auth');
+
 Route::get('/admin/feedbacks', 'AppealsController@index')->middleware('auth', 'admin');
 Route::get('/contacts', 'AppealsController@create')->name('contacts');
 

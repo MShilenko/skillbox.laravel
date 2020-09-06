@@ -19,6 +19,12 @@
 	  {{ $news->text }}
 	</div><!-- /.blog-news -->	
 
+	@include('layout.forms.comment', ['model' => 'App\News', 'id' => $news->id])	
+
+	@if ($news->comments()->exists())
+		@include('layout.comments', ['comments' => $news->comments])
+	@endif
+
 	<nav class="blog-pagination">
 	  <a class="btn btn-outline-primary" href="{{ route('main') }}">Вернуться на главную</a>
 	</nav>

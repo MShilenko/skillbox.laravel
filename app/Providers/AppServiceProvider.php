@@ -32,13 +32,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         /** Add Observer for Post model */
-        Post::observe(PostObserver::class);
+        // Post::observe(PostObserver::class);
 
         Blade::directive('editPost', function ($post) {
             $user = User::find(Auth::id());
             $route = 'posts.edit';
 
-            if ($user->isAdmin()) {
+            if ($user && $user->isAdmin()) {
                 $route = "admin.{$route}";
             }
 

@@ -19,6 +19,12 @@
 	  {{ $post->text }}
 	</div><!-- /.blog-post -->
 
+	@include('layout.forms.comment', ['model' => 'App\Post', 'id' => $post->id])	
+
+	@if ($post->comments()->exists())
+		@include('layout.comments', ['comments' => $post->comments])
+	@endif
+
 	@admin
 		<hr>
 

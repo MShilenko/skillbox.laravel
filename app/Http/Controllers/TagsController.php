@@ -11,9 +11,7 @@ class TagsController extends Controller
     {
         $select = ['title', 'slug', 'created_at', 'excerpt'];
         $perPage = config('skillbox.posts.paginate');
-        $posts = $tag->posts()->with('tags:name')->get($select);
-        $news = $tag->news()->with('tags:name')->get($select);
-        $posts = $posts->concat($news);
+        $posts = $tag->posts()->union($tag->news())->with('tags:name')->where('public', true)->paginate($perPage);
 
         return view('posts.index', compact('posts'));
     }

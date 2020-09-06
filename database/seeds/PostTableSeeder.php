@@ -1,5 +1,6 @@
 <?php
 
+use App\Comment;
 use App\Post;
 use App\Tag;
 use Illuminate\Database\Seeder;
