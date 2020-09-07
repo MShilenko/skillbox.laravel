@@ -32,4 +32,6 @@ Route::get('/contacts', 'AppealsController@create')->name('contacts');
 
 Route::view('/about', 'about')->name('about');
 
+Route::get('/statistics', 'StatisticController@index')->name('statistics');
+
 Auth::routes();
