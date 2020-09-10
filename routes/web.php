@@ -13,7 +13,10 @@ Route::name('admin.')->middleware(['auth', 'admin'])->prefix('admin')->group(fun
     Route::resource('posts', 'PostsController');
     Route::resource('news', 'NewsController')->except(['show']);
 
-    Route::get('/news', 'NewsController@index')->name('news');
+    Route::get('news', 'NewsController@index')->name('news');
+
+    Route::get('/reports', 'ReportsController@index')->name('reports');
+    Route::post('/reports', 'ReportsController@send');
 
     Route::post('feedbacks', 'AppealsController@store')->name('feedbacks');
 });
@@ -35,3 +38,6 @@ Route::view('/about', 'about')->name('about');
 Route::get('/statistics', 'StatisticController@index')->name('statistics');
 
 Auth::routes();
+
+
+

@@ -9,7 +9,8 @@
 	  @endauth
 
 	  @admin
-	  	<a class="p-2 text-muted" href="{{ route('admin.') }}">Админ</a>
+	  	<a class="p-2 text-muted" href="{{ route('admin.reports') }}">Отчет</a>
+      <a class="p-2 text-muted" href="{{ route('admin.') }}">Админ</a>
 	  @endadmin  
   </nav>
 </div>
