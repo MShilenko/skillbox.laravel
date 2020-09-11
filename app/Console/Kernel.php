@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('horizon:snapshot')->weekly();
         $schedule->command('newsletters:post "2020-08-22" "2020-08-24"')->weekly()->mondays()->at('10:00');
     }
 
