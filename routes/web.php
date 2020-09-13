@@ -41,3 +41,6 @@ Auth::routes();
 
 
 
+Route::get('/test', function() {
+    event(new \App\Events\TestBR('Тест'));
+});

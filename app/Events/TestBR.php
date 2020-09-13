@@ -14,14 +14,16 @@ class TestBR implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $test;
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($test)
     {
-        //
+        $this->test = $test;
     }
 
     /**
@@ -31,6 +33,6 @@ class TestBR implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('channel-name');
+        return new Channel('hello');
     }
 }

@@ -1,0 +1,5 @@
+Echo
+	.channel('hello')
+	.listen('TestBR', (e) => {
+		alert(e.test);
+	});
