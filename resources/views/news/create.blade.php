@@ -10,7 +10,7 @@
 
 	@include('layout.errors')
 
-	<form method="POST" action="{{ route('main') }}">
+	<form method="POST" action="{{ route('admin.news.store') }}">
 		@csrf
 		@include('news.forms.create-and-update', ['news' => new \App\Post(), 'button' => 'Создать новость'])
 	</form>

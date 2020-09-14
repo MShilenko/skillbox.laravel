@@ -10,4 +10,7 @@ return [
     'posts' => [
         'paginate' => 10,
     ],
+    'cache' => [
+        'time' => 3600
+    ],
 ];

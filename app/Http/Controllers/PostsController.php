@@ -6,6 +6,7 @@ use App\Post;
 use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -22,16 +23,19 @@ class PostsController extends Controller
 
     public function index()
     {
-        /** Пример вывода только нужных полей из основной и связанной моделей */
-        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-        $query = Post::select($rows)->with([
-            'tags' => function ($tag) {
-                $tag->select(['id', 'name']);
-            }
-        ])->latest();
-        $perPage = config('skillbox.posts.paginate');
-        /** Здесь также дописываем запрос в зависимости от роута с которого от пришел */
-        $posts = Route::currentRouteName() === "admin.posts.index" ? $query->paginate($perPage) : $query->where('public', true)->paginate($perPage); 
+        $posts = Cache::tags('posts')->remember('posts', config('skillbox.cache.time'), function () {
+            /** Пример вывода только нужных полей из основной и связанной моделей */
+            $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+            $query = Post::select($rows)->with([
+                'tags' => function ($tag) {
+                    $tag->select(['id', 'name']);
+                }
+            ])->latest();
+            $perPage = config('skillbox.posts.paginate');
+
+            /** Здесь также дописываем запрос в зависимости от роута с которого от пришел */
+            return Route::currentRouteName() === "admin.posts.index" ? $query->paginate($perPage) : $query->where('public', true)->paginate($perPage); 
+        });
 
         return view('posts.index', compact('posts'));
     }
@@ -43,6 +47,12 @@ class PostsController extends Controller
      */
     public function show(Post $post)
     {
+        if (!Cache::tags(["post|{$post->id}"])->has("post|{$post->id}")) {
+            Cache::tags(["post|{$post->id}"])->put("post|{$post->id}", $post, config('skillbox.cache.time'));    
+        }
+
+        $post = Cache::tags(["post|{$post->id}"])->get("post|{$post->id}", $post);
+
         return view('posts.show', compact('post'));
     }
 
@@ -63,10 +73,6 @@ class PostsController extends Controller
             Tag::syncWithModel($post, $request->tags);
         }
 
-        push_all("Создана новая статья", "{$post->title} | {$post->created_at}");
-
-        flash('Статья успешно cоздана!');
-
         return redirect(route('main'));
     }
 
@@ -80,10 +86,6 @@ class PostsController extends Controller
             Tag::syncWithModel($post, $request->tags);
         }
 
-        push_all("Изменена статья", "{$post->title} | {$post->updated_at}");
-
-        flash('Статья успешно обновлена!');
-
         return redirect(route('posts.show', ['post' => $post]));
     }
 
@@ -93,8 +95,6 @@ class PostsController extends Controller
 
     public function destroy(Post $post){
         $post->delete();
-
-        flash('Статья удалена!', 'warning');
 
         return redirect(route('main'));
     }

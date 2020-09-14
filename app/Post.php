@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class Post extends Model
 {
@@ -19,6 +20,23 @@ class Post extends Model
 
     protected static function booted() 
     {
+        static::updated(function($model) {
+            Cache::tags("post|{$model->id}")->flush();
+            push_all("Изменена статья", "{$model->title} | {$model->updated_at}");
+            flash('Статья успешно обновлена!');
+        });
+
+        static::created(function($model) {
+            Cache::tags("posts")->flush();
+            push_all("Создана новая статья", "{$model->title} | {$model->created_at}");
+            flash('Статья успешно cоздана!');
+        });
+
+        static::deleted(function($model) {
+            Cache::tags(["posts", "post|{$model->id}"])->flush();
+            flash('Статья удалена!', 'warning');
+        });
+
         static::updating(function ($post) {
             $post->history()->attach(Auth::id(), [
                 'changes' => json_encode($post->getDirty()),

@@ -31,4 +31,4 @@ const app = new Vue({
     el: '#app',
 });
 
-require('./echo');
+// require('./echo');
