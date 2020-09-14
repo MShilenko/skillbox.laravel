@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Tag extends Model
 {
@@ -25,7 +26,11 @@ class Tag extends Model
 
     public static function tagsCloud()
     {
-        return static::has('posts')->orHas('news')->get();
+        $tagsCloud = Cache::tags('tags_cloud')->remember('tags_cloud', config('skillbox.cache.time'), function () {
+            return static::has('posts')->orHas('news')->get();
+        });
+
+        return $tagsCloud;
     }
 
     public static function syncWithModel($model, string $tags)

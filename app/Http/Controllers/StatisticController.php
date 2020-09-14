@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class StatisticController extends Controller
@@ -60,6 +61,12 @@ class StatisticController extends Controller
             ->first()
             ->commentable_id;
         $statistics['most_commented_post'] = \App\Post::find($postFromComments);
+
+        if (!Cache::tags("statistics")->has("statistics")) {
+            Cache::tags("statistics")->put("statistics", $statistics, config('skillbox.cache.time'));    
+        }
+
+        $statistics = Cache::tags("statistics")->get("statistics", $statistics);
 
         return view('statistic', compact('statistics'));
     }

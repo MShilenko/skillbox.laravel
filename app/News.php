@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class News extends Model
 {
@@ -14,6 +15,24 @@ class News extends Model
     public function getRouteKeyName()
     {
         return 'slug';
+    }
+
+    protected static function booted() 
+    {
+        static::updated(function($model) {
+            Cache::tags(["news", "news|{$model->id}", "posts_tags", "tags_cloud", "statistics"])->flush();
+            flash('Новость успешно обновлена!');
+        });
+
+        static::created(function($model) {
+            Cache::tags(["posts", "posts_tags", "tags_cloud", "statistics"])->flush();
+            flash('Новость успешно cоздана!');
+        });
+
+        static::deleted(function($model) {
+            Cache::tags(["news", "news|{$model->id}", "posts_tags", "tags_cloud", "statistics"])->flush();
+            flash('Новость удалена!', 'warning');
+        });
     }
 
     public function tags()

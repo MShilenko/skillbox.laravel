@@ -16,7 +16,7 @@ Route::name('admin.')->middleware(['auth', 'admin'])->prefix('admin')->group(fun
     Route::get('news', 'NewsController@index')->name('news');
 
     Route::get('/reports', 'ReportsController@index')->name('reports');
-    Route::post('/reports', 'ReportsController@send');
+    Route::post('/reports', 'ReportsController@send')->name('reports.send');
 
     Route::post('feedbacks', 'AppealsController@store')->name('feedbacks');
 });

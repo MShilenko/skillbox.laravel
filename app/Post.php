@@ -21,19 +21,19 @@ class Post extends Model
     protected static function booted() 
     {
         static::updated(function($model) {
-            Cache::tags("post|{$model->id}")->flush();
+            Cache::tags(["posts", "post|{$model->id}", "posts_tags", "tags_cloud", "statistics"])->flush();
             push_all("Изменена статья", "{$model->title} | {$model->updated_at}");
             flash('Статья успешно обновлена!');
         });
 
         static::created(function($model) {
-            Cache::tags("posts")->flush();
+            Cache::tags(["posts", "posts_tags", "tags_cloud", "statistics"])->flush();
             push_all("Создана новая статья", "{$model->title} | {$model->created_at}");
             flash('Статья успешно cоздана!');
         });
 
         static::deleted(function($model) {
-            Cache::tags(["posts", "post|{$model->id}"])->flush();
+            Cache::tags(["posts", "post|{$model->id}", "posts_tags", "tags_cloud", "statistics"])->flush();
             flash('Статья удалена!', 'warning');
         });
 
