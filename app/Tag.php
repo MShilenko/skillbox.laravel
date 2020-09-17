@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Tag extends Model
 {
     protected $fillable = ['name'];
+    /** Свойство обновляет updated_at у связанных моделей, что позволяет точно отловить изменение, например если у статьи мы поменяли только теги */
+    protected $touches = ['posts', 'news'];
 
     public function getRouteKeyName()
     {

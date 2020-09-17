@@ -14,15 +14,17 @@ class NewsController extends Controller
     public function index()
     {
         /** Пример вывода только нужных полей из основной и связанной моделей */
-        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-        $query = News::select($rows)->with([
-            'tags' => function ($tag) {
-                $tag->select(['id', 'name']);
-            }
-        ])->latest();
-        $perPage = config('skillbox.posts.paginate');
-        /** Здесь также дописываем запрос в зависимости от роута с которого от пришел */
-        $news = Route::currentRouteName() === "admin.news" ? $query->paginate($perPage) : $query->where('public', true)->paginate($perPage); 
+       $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+        $perPage = config('skillbox.newss.paginate');
+        $news = News::select($rows)
+            ->with([
+                'tags' => function ($tag) {
+                    $tag->select(['id', 'name']);
+                }
+            ])
+            ->latest()
+            ->where('public', true)
+            ->paginate($perPage); 
 
         return view('news.index', compact('news'));
     }
@@ -84,5 +86,18 @@ class NewsController extends Controller
         flash('Новость удалена!', 'warning');
 
         return redirect(route('news'));
+    }
+
+    public function addComment(Request $request, News $news) 
+    {
+        $validatedData = $request->validate([
+            'text' => 'required|unique:comments|min:50|max:255',
+        ]);
+
+        $news->comments()->create(['user_id' => \Auth::id(), 'text' => $validatedData['text']]);
+
+        flash('Комментарий добавлен успешно.');
+
+        return back();
     } 
 }

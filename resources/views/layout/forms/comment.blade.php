@@ -5,10 +5,8 @@
 
 	@include('layout.errors')
 
-	<form method="POST" action="{{ route('comments.store') }}">
+	<form method="POST" action="{{ route($route, $post) }}">
 		@csrf
-		<input type="hidden" name="model" value="{{ $model }}">
-		<input type="hidden" name="id" value="{{ $id }}">
 		<div class="form-group">
 		  <label for="inputText">Комментарий</label>
 		  <textarea name="text" class="form-control" id="inputText" placeholder="Введите детальное описание">{{ old('text') }}</textarea>

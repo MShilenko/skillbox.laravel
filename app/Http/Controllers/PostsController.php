@@ -24,14 +24,16 @@ class PostsController extends Controller
     {
         /** Пример вывода только нужных полей из основной и связанной моделей */
         $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-        $query = Post::select($rows)->with([
-            'tags' => function ($tag) {
-                $tag->select(['id', 'name']);
-            }
-        ])->latest();
         $perPage = config('skillbox.posts.paginate');
-        /** Здесь также дописываем запрос в зависимости от роута с которого от пришел */
-        $posts = Route::currentRouteName() === "admin.posts.index" ? $query->paginate($perPage) : $query->where('public', true)->paginate($perPage); 
+        $posts = Post::select($rows)
+            ->with([
+                'tags' => function ($tag) {
+                    $tag->select(['id', 'name']);
+                }
+            ])
+            ->latest()
+            ->where('public', true)
+            ->paginate($perPage);
 
         return view('posts.index', compact('posts'));
     }
@@ -97,5 +99,18 @@ class PostsController extends Controller
         flash('Статья удалена!', 'warning');
 
         return redirect(route('main'));
+    }
+
+    public function addComment(Request $request, Post $post) 
+    {
+        $validatedData = $request->validate([
+            'text' => 'required|unique:comments|min:50|max:255',
+        ]);
+
+        $post->comments()->create(['user_id' => \Auth::id(), 'text' => $validatedData['text']]);
+
+        flash('Комментарий добавлен успешно.');
+
+        return back();
     }
 }

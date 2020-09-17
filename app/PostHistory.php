@@ -2,9 +2,9 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class PostHistory extends Model
+class PostHistory extends Pivot
 {
     protected $fillable = ['post_id', 'user_id', 'changes', 'created_at', 'updated_at'];
 

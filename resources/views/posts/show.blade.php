@@ -19,7 +19,7 @@
 	  {{ $post->text }}
 	</div><!-- /.blog-post -->
 
-	@include('layout.forms.comment', ['model' => 'App\Post', 'id' => $post->id])	
+	@include('layout.forms.comment', ['route' => 'post.comment.store', 'post' => ['post' => $post]])	
 
 	@if ($post->comments()->exists())
 		@include('layout.comments', ['comments' => $post->comments])

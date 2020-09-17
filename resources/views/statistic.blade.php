@@ -22,10 +22,10 @@
 	    </tr>
 	    <tr>
 	      <th scope="row">Самая длинная статья</th>
-	      <td><a href="{{ route('posts.show', ['post' => $statistics['longest_post']->slug]) }}">{{ $statistics['longest_post']->title }}</a> | {{ $statistics['longest_post']->length }}</td>
+	      <td><a href="{{ route('posts.show', ['post' => $statistics['longest_post']->slug]) }}">{{ $statistics['longest_post']->title }}</a> | {{ $statistics['longest_post']->textLength }}</td>
 	    <tr>
 	      <th scope="row">Самая короткая статья</th>
-	      <td><a href="{{ route('posts.show', ['post' => $statistics['shortest_post']->slug]) }}">{{ $statistics['shortest_post']->title }}</a> | {{ $statistics['shortest_post']->length }}</td>
+	      <td><a href="{{ route('posts.show', ['post' => $statistics['shortest_post']->slug]) }}">{{ $statistics['shortest_post']->title }}</a> | {{ $statistics['shortest_post']->textLength }}</td>
 	    <tr>
 	      <th scope="row">Средние количество статей у “активных” пользователей</th>
 	      <td>{{ $statistics['avg_amount_posts'] }}</td>
