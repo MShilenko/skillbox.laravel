@@ -25,17 +25,17 @@ class PostsController extends Controller
     {
         $posts = Cache::tags('posts')->remember('posts', config('skillbox.cache.time'), function () {
            /** Пример вывода только нужных полей из основной и связанной моделей */
-        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-        $perPage = config('skillbox.posts.paginate');
-        return Post::select($rows)
-            ->with([
-                'tags' => function ($tag) {
-                    $tag->select(['id', 'name']);
-                }
-            ])
-            ->latest()
-            ->where('public', true)
-            ->paginate($perPage);
+            $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+            $perPage = config('skillbox.posts.paginate');
+            return Post::select($rows)
+                ->with([
+                    'tags' => function ($tag) {
+                        $tag->select(['id', 'name']);
+                    }
+                ])
+                ->latest()
+                ->where('public', true)
+                ->paginate($perPage);
         });
 
         return view('posts.index', compact('posts'));

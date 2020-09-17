@@ -6,6 +6,7 @@ use App\News;
 use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdateNews;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -43,7 +44,7 @@ class NewsController extends Controller
         }
 
         $news = Cache::tags(["news|{$news->id}"])->get("news|{$news->id}", $news);
-        
+
         return view('news.show', compact('news'));
     }
 
