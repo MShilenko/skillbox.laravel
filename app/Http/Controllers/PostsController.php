@@ -24,17 +24,18 @@ class PostsController extends Controller
     public function index()
     {
         $posts = Cache::tags('posts')->remember('posts', config('skillbox.cache.time'), function () {
-            /** Пример вывода только нужных полей из основной и связанной моделей */
-            $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-            $query = Post::select($rows)->with([
+           /** Пример вывода только нужных полей из основной и связанной моделей */
+        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+        $perPage = config('skillbox.posts.paginate');
+        return Post::select($rows)
+            ->with([
                 'tags' => function ($tag) {
                     $tag->select(['id', 'name']);
                 }
-            ])->latest();
-            $perPage = config('skillbox.posts.paginate');
-
-            /** Здесь также дописываем запрос в зависимости от роута с которого от пришел */
-            return Route::currentRouteName() === "admin.posts.index" ? $query->paginate($perPage) : $query->where('public', true)->paginate($perPage); 
+            ])
+            ->latest()
+            ->where('public', true)
+            ->paginate($perPage);
         });
 
         return view('posts.index', compact('posts'));
@@ -97,5 +98,18 @@ class PostsController extends Controller
         $post->delete();
 
         return redirect(route('main'));
+    }
+
+    public function addComment(Request $request, Post $post) 
+    {
+        $validatedData = $request->validate([
+            'text' => 'required|unique:comments|min:50|max:255',
+        ]);
+
+        $post->comments()->create(['user_id' => \Auth::id(), 'text' => $validatedData['text']]);
+
+        flash('Комментарий добавлен успешно.');
+
+        return back();
     }
 }

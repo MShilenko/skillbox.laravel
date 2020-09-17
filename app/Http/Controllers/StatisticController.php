@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Post;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -11,56 +13,32 @@ class StatisticController extends Controller
     public function index() 
     {
         $statistics = [];
+        $users = new User();
+        $posts = new Post();
 
         /** Число записей в таблицах */
         $statistics['posts_count'] = DB::table('posts')->count();        
         $statistics['news_count'] = DB::table('news')->count();  
 
         /** Автор с максимальным числом постов */
-        $bestAuthorId = DB::table('posts')
-            ->select(DB::raw('count(*) as posts_count, user_id'))
-            ->groupBy('user_id')
-            ->orderBy('posts_count', 'DESC')
-            ->first()
-            ->user_id;
-        $statistics['best_author'] = \App\User::find($bestAuthorId);
+        $statistics['best_author'] = $users->withCount('posts')->get(['id', 'name'])->sortBy('posts_count')->last();
 
         /** Самая длинная/короткая статья */
-        $statistics['longest_post'] = DB::table('posts')
-            ->select(DB::raw('title, slug, LENGTH(text) as length'))
-            ->orderBy('length', 'DESC')
-            ->first();  
-        $statistics['shortest_post'] = DB::table('posts')
-            ->select(DB::raw('title, slug, LENGTH(text) as length'))
-            ->orderBy('length')
-            ->first();  
+        $query = $posts->get(['title', 'text', 'slug'])->sortBy(function ($post) {
+            $post->textLength = mb_strlen($post->text);
+            return $post->textLength;
+        });
+        $statistics['longest_post'] = $query->last();
+        $statistics['shortest_post'] = $query->first();
 
         /** Средние количество статей у “активных” пользователей */
-        $statistics['avg_amount_posts'] = DB::table('posts')
-            ->select(DB::raw('count(*) as posts_count, user_id'))
-            ->having('posts_count', '>', 1)
-            ->groupBy('user_id')
-            ->get()
-            ->avg('posts_count');
+        $statistics['avg_amount_posts'] = $users->withCount('posts')->get()->where('posts_count', '>', 1)->avg('posts_count');
 
         /** Статья которую меняли чаще */
-        $postFromHistory = DB::table('post_histories')
-            ->select(DB::raw('count(*) as changes_count, post_id'))
-            ->groupBy('post_id')
-            ->orderBy('changes_count', 'DESC')
-            ->first()
-            ->post_id;
-        $statistics['biggest_history_post'] = \App\Post::find($postFromHistory);
+        $statistics['biggest_history_post'] = $posts->withCount('history')->get(['title', 'slug'])->sortBy('history_count')->last();
 
         /** Самая обсуждаемая статья */
-        $postFromComments = DB::table('comments')
-            ->select(DB::raw('count(*) as comments_count, commentable_id'))
-            ->where('commentable_type', \App\Post::class)
-            ->groupBy('commentable_id')
-            ->orderBy('comments_count', 'DESC')
-            ->first()
-            ->commentable_id;
-        $statistics['most_commented_post'] = \App\Post::find($postFromComments);
+        $statistics['most_commented_post'] = $posts->withCount('comments')->get(['title', 'slug'])->sortBy('comments_count')->last();
 
         if (!Cache::tags("statistics")->has("statistics")) {
             Cache::tags("statistics")->put("statistics", $statistics, config('skillbox.cache.time'));    

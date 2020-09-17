@@ -2,18 +2,19 @@
 
 use App\Role;
 use App\User;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Hash;
 
-class AddAdminToUserTable extends Seeder
+class AddAdmin extends Migration
 {
     /**
-     * Run the database seeds.
+     * Run the migrations.
      *
      * @return void
      */
-    public function run()
+    public function up()
     {
         $user = new User();
         $adminRole = Role::firstOrCreate(['role' => 'admin']);

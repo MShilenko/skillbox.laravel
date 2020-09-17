@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use Illuminate\Support\Facades\Http;
+
 class Pushall
 {
     private $id;
@@ -24,8 +26,6 @@ class Pushall
             "text" => $text,
         ];
 
-        $client = new \GuzzleHttp\Client(['base_uri' => $this->url]);
-
-        return $client->post('', ['form_params' => $data]);
+        return Http::asForm()->post($this->url, $data);
     }
 }

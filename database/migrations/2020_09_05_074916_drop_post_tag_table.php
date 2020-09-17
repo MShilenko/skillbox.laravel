@@ -15,4 +15,13 @@ class DropPostTagTable extends Migration
     {
         Schema::dropIfExists('post_tag');
     }
+
+    public function down() 
+    {
+        Schema::create('post_tag', function (Blueprint $table) {
+            $table->foreignId('tag_id')->constrained()->onDelete('cascade');
+            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->primary(['tag_id', 'post_id']);
+        });
+    }
 }
