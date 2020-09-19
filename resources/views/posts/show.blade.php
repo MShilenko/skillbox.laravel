@@ -36,7 +36,7 @@
 			<p>Затронутые поля:</p>
 			<table class="table">
 				<tbody>
-					@foreach(json_decode($item->pivot->changes) as $key => $item)
+					@foreach($item->pivot->changes as $key => $item)
 						<tr>
 							<td>{{ $key }}</td>
 							<td>{{ $item }}</td>

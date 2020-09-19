@@ -6,6 +6,9 @@ use App\Post;
 use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
+use App\Scopes\PostAndNewsIndexScope;
+use App\Service\AddCommentService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -20,20 +23,16 @@ class PostsController extends Controller
         $this->middleware('can:update,post')->except(['index', 'show', 'create', 'store']);
     }
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new PostAndNewsIndexScope);
+    }
+
     public function index()
     {
-        /** Пример вывода только нужных полей из основной и связанной моделей */
-        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+       /** Пример вывода только нужных полей из основной и связанной моделей */
         $perPage = config('skillbox.posts.paginate');
-        $posts = Post::select($rows)
-            ->with([
-                'tags' => function ($tag) {
-                    $tag->select(['id', 'name']);
-                }
-            ])
-            ->latest()
-            ->where('public', true)
-            ->paginate($perPage);
+        $posts = Post::where('public', true)->paginate($perPage);
 
         return view('posts.index', compact('posts'));
     }
@@ -65,10 +64,6 @@ class PostsController extends Controller
             Tag::syncWithModel($post, $request->tags);
         }
 
-        push_all("Создана новая статья", "{$post->title} | {$post->created_at}");
-
-        flash('Статья успешно cоздана!');
-
         return redirect(route('main'));
     }
 
@@ -82,10 +77,6 @@ class PostsController extends Controller
             Tag::syncWithModel($post, $request->tags);
         }
 
-        push_all("Изменена статья", "{$post->title} | {$post->updated_at}");
-
-        flash('Статья успешно обновлена!');
-
         return redirect(route('posts.show', ['post' => $post]));
     }
 
@@ -96,21 +87,13 @@ class PostsController extends Controller
     public function destroy(Post $post){
         $post->delete();
 
-        flash('Статья удалена!', 'warning');
-
         return redirect(route('main'));
     }
 
-    public function addComment(Request $request, Post $post) 
+    public function comment(Request $request, Post $post) 
     {
-        $validatedData = $request->validate([
-            'text' => 'required|unique:comments|min:50|max:255',
-        ]);
+       AddCommentService::addComment($request, $post);
 
-        $post->comments()->create(['user_id' => \Auth::id(), 'text' => $validatedData['text']]);
-
-        flash('Комментарий добавлен успешно.');
-
-        return back();
+       return redirect()->route('posts.show', ['post' => $post]);
     }
 }

@@ -2,9 +2,11 @@
 
 namespace App;
 
+use App\Interfaces\Commentable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
-class News extends Model
+class News extends Model implements Commentable
 {
     protected $fillable = ['title', 'slug', 'excerpt', 'public', 'text', 'tags', 'user_id'];
 

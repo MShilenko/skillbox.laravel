@@ -9,16 +9,16 @@ use Illuminate\Http\Request;
 
 class AdminPostsController extends PostsController
 {
+    protected static function booted()
+    {
+        parent::booted();
+    }
+
     public function index()
     {
-        /** Пример вывода только нужных полей из основной и связанной моделей */
-        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+       /** Пример вывода только нужных полей из основной и связанной моделей */
         $perPage = config('skillbox.posts.paginate');
-        $posts = Post::select($rows)->with([
-            'tags' => function ($tag) {
-                $tag->select(['id', 'name']);
-            }
-        ])->latest()->paginate($perPage);
+        $posts = Post::paginate($perPage);
 
         return view('posts.index', compact('posts'));
     }

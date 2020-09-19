@@ -2,10 +2,11 @@
 
 namespace App;
 
+use App\Interfaces\Commentable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class Post extends Model
+class Post extends Model implements Commentable
 {
     protected $fillable = ['title', 'slug', 'excerpt', 'public', 'text', 'tags', 'user_id'];
 
@@ -43,6 +44,6 @@ class Post extends Model
 
     public function history()
     {
-        return $this->belongsToMany(User::class, 'post_histories')->withPivot('changes')->withTimestamps();
+        return $this->belongsToMany(User::class, 'post_histories')->using(PostHistory::class)->withPivot(['changes', 'created_at']);
     }
 }

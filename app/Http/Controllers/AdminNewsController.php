@@ -12,16 +12,16 @@ use Illuminate\Http\Request;
 
 class AdminNewsController extends NewsController
 {
+    protected static function booted()
+    {
+        parent::booted();
+    }
+
     public function index()
     {
-        /** Пример вывода только нужных полей из основной и связанной моделей */
-        $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-        $perPage = config('skillbox.newss.paginate');
-        $news = News::select($rows)->with([
-            'tags' => function ($tag) {
-                $tag->select(['id', 'name']);
-            }
-        ])->latest()->paginate($perPage);
+       /** Пример вывода только нужных полей из основной и связанной моделей */
+        $perPage = config('skillbox.posts.paginate');
+        $news = News::paginate($perPage);
 
         return view('news.index', compact('news'));
     }

@@ -6,25 +6,23 @@ use App\News;
 use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdateNews;
+use App\Service\AddCommentService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
+    protected static function booted()
+    {
+        static::addGlobalScope(new PostAndNewsIndexScope);
+    }
+
     public function index()
     {
-        /** Пример вывода только нужных полей из основной и связанной моделей */
-       $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-        $perPage = config('skillbox.newss.paginate');
-        $news = News::select($rows)
-            ->with([
-                'tags' => function ($tag) {
-                    $tag->select(['id', 'name']);
-                }
-            ])
-            ->latest()
-            ->where('public', true)
-            ->paginate($perPage); 
+       /** Пример вывода только нужных полей из основной и связанной моделей */
+        $perPage = config('skillbox.posts.paginate');
+        $news = News::where('public', true)->paginate($perPage);
 
         return view('news.index', compact('news'));
     }
@@ -88,16 +86,10 @@ class NewsController extends Controller
         return redirect(route('news'));
     }
 
-    public function addComment(Request $request, News $news) 
+    public function comment(Request $request, News $news) 
     {
-        $validatedData = $request->validate([
-            'text' => 'required|unique:comments|min:50|max:255',
-        ]);
+       AddCommentService::addComment($request, $news);
 
-        $news->comments()->create(['user_id' => \Auth::id(), 'text' => $validatedData['text']]);
-
-        flash('Комментарий добавлен успешно.');
-
-        return back();
-    } 
+       return redirect()->route('news.show', ['news' => $news]);
+    }
 }
