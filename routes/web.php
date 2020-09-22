@@ -28,8 +28,8 @@ Route::get('/news/{news}', 'NewsController@show')->name('news.show');
 Route::get('/', 'PostsController@index')->name('main');
 Route::post('/', 'PostsController@store');
 
-Route::post('/posts/{post}/add-comment', 'PostsController@addComment')->name('post.comment.store')->middleware('auth');
-Route::post('/news/{news}/add-comment', 'NewsController@addComment')->name('news.comment.store')->middleware('auth');
+Route::post('/posts/{post}/add-comment', 'PostsController@comment')->name('post.comment.store')->middleware('auth');
+Route::post('/news/{news}/add-comment', 'NewsController@comment')->name('news.comment.store')->middleware('auth');
 
 Route::get('/admin/feedbacks', 'AppealsController@index')->middleware('auth', 'admin');
 Route::get('/contacts', 'AppealsController@create')->name('contacts');

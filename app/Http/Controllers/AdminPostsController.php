@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Post;
-use App\Tag;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 
 class AdminPostsController extends PostsController
 {
+    protected static function booted()
+    {
+        parent::booted();
+    }
+
     public function index()
     {
         $posts = Cache::tags('posts')->remember('posts', config('skillbox.cache.time'), function () {
@@ -18,7 +20,7 @@ class AdminPostsController extends PostsController
             $posts = Post::select($rows)->with([
                 'tags' => function ($tag) {
                     $tag->select(['id', 'name']);
-                }
+                },
             ])->latest()->paginate($perPage);
         });
 

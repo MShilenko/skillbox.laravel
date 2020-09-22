@@ -13,32 +13,32 @@ class StatisticController extends Controller
     public function index() 
     {
         $statistics = [];
-        $users = new User();
-        $posts = new Post();
 
         /** Число записей в таблицах */
         $statistics['posts_count'] = DB::table('posts')->count();        
         $statistics['news_count'] = DB::table('news')->count();  
 
         /** Автор с максимальным числом постов */
-        $statistics['best_author'] = $users->withCount('posts')->get(['id', 'name'])->sortBy('posts_count')->last();
+        $statistics['best_author'] = User::select(['id', 'name'])->withCount('posts')->orderBy('posts_count', 'desc')->first();
 
         /** Самая длинная/короткая статья */
-        $query = $posts->get(['title', 'text', 'slug'])->sortBy(function ($post) {
-            $post->textLength = mb_strlen($post->text);
-            return $post->textLength;
-        });
-        $statistics['longest_post'] = $query->last();
-        $statistics['shortest_post'] = $query->first();
+        $statistics['longest_post'] = Post::select(['title', 'slug', 'text_length' => function ($query) {
+            $query->selectRaw('LENGTH(text)');
+        }])->orderBy('text_length', 'desc')->first();
+        $statistics['shortest_post'] = Post::select(['title', 'slug', 'text_length' => function ($query) {
+            $query->selectRaw('LENGTH(text)');
+        }])->orderBy('text_length')->first();
 
         /** Средние количество статей у “активных” пользователей */
-        $statistics['avg_amount_posts'] = $users->withCount('posts')->get()->where('posts_count', '>', 1)->avg('posts_count');
+        $statistics['avg_amount_posts'] = User::withCount(['posts', 'posts as posts_count' => function ($query) {
+            $query->where('posts_count', '>', 1);
+        }])->pluck('posts_count')->avg();
 
         /** Статья которую меняли чаще */
-        $statistics['biggest_history_post'] = $posts->withCount('history')->get(['title', 'slug'])->sortBy('history_count')->last();
+        $statistics['biggest_history_post'] = Post::select(['title', 'slug'])->withCount('history')->orderBy('history_count', 'desc')->first();
 
         /** Самая обсуждаемая статья */
-        $statistics['most_commented_post'] = $posts->withCount('comments')->get(['title', 'slug'])->sortBy('comments_count')->last();
+        $statistics['most_commented_post'] = Post::select(['title', 'slug'])->withCount('comments')->orderBy('comments_count', 'desc')->first();
 
         if (!Cache::tags("statistics")->has("statistics")) {
             Cache::tags("statistics")->put("statistics", $statistics, config('skillbox.cache.time'));    

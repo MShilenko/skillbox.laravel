@@ -2,32 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\News;
-use App\Service\Pushall;
-use App\Tag;
 use App\Http\Requests\StoreAndUpdateNews;
+use App\News;
+use App\Scopes\PostAndNewsIndexScope;
+use App\Service\AddCommentService;
+use App\Tag;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
+    protected static function booted()
+    {
+        static::addGlobalScope(new PostAndNewsIndexScope);
+    }
+
     public function index()
     {
         $news = Cache::tags('news')->remember('news', config('skillbox.cache.time'), function () {
             /** Пример вывода только нужных полей из основной и связанной моделей */
-           $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+            $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
             $perPage = config('skillbox.posts.paginate');
             return News::select($rows)
                 ->with([
                     'tags' => function ($tag) {
                         $tag->select(['id', 'name']);
-                    }
+                    },
                 ])
                 ->latest()
                 ->where('public', true)
                 ->paginate($perPage);
-            });
+        });
 
         return view('news.index', compact('news'));
     }
@@ -40,7 +46,7 @@ class NewsController extends Controller
     public function show(News $news)
     {
         if (!Cache::tags(["news|{$news->id}"])->has("news|{$news->id}")) {
-            Cache::tags(["news|{$news->id}"])->put("news|{$news->id}", $news, config('skillbox.cache.time'));    
+            Cache::tags(["news|{$news->id}"])->put("news|{$news->id}", $news, config('skillbox.cache.time'));
         }
 
         $news = Cache::tags(["news|{$news->id}"])->get("news|{$news->id}", $news);
@@ -61,7 +67,7 @@ class NewsController extends Controller
 
         $news = News::create($validated);
 
-        if ($request->tags){
+        if ($request->tags) {
             Tag::syncWithModel($news, $request->tags);
         }
 
@@ -76,7 +82,7 @@ class NewsController extends Controller
 
         $news->update($validated);
 
-        if ($request->tags){
+        if ($request->tags) {
             Tag::syncWithModel($news, $request->tags);
         }
 
@@ -85,11 +91,13 @@ class NewsController extends Controller
         return redirect(route('news.show', ['news' => $news]));
     }
 
-    public function edit(News $news){
+    public function edit(News $news)
+    {
         return view('news.edit', compact('news'));
     }
 
-    public function destroy(News $news){
+    public function destroy(News $news)
+    {
         $news->delete();
 
         flash('Новость удалена!', 'warning');
@@ -97,16 +105,10 @@ class NewsController extends Controller
         return redirect(route('news'));
     }
 
-    public function addComment(Request $request, News $news) 
+    public function comment(Request $request, News $news)
     {
-        $validatedData = $request->validate([
-            'text' => 'required|unique:comments|min:50|max:255',
-        ]);
+        AddCommentService::addComment($request, $news);
 
-        $news->comments()->create(['user_id' => \Auth::id(), 'text' => $validatedData['text']]);
-
-        flash('Комментарий добавлен успешно.');
-
-        return back();
-    } 
+        return redirect()->route('news.show', ['news' => $news]);
+    }
 }
