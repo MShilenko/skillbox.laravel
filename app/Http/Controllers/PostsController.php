@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
 class PostsController extends Controller
@@ -20,7 +22,9 @@ class PostsController extends Controller
 
     public function index()
     {
-        return view('posts.index', ['posts' => Post::with('tags')->latest()->get()]);
+        $posts = Route::currentRouteName() === "admin.posts.index" ? Post::with('tags')->latest()->get() : Post::with('tags')->where('public', true)->latest()->get();
+
+        return view('posts.index', compact('posts'));
     }
 
     /**
@@ -50,6 +54,8 @@ class PostsController extends Controller
             $this->syncTags($post, $request->tags);
         }
 
+        push_all("Создана новая статья", "{$post->title} | {$post->created_at}");
+
         flash('Статья успешно cоздана!');
 
         return redirect(route('main'));
@@ -64,6 +70,8 @@ class PostsController extends Controller
         if ($request->tags){
             $this->syncTags($post, $request->tags);
         }
+
+        push_all("Изменена статья", "{$post->title} | {$post->updated_at}");
 
         flash('Статья успешно обновлена!');
 

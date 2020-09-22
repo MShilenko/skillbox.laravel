@@ -75,6 +75,6 @@ class PostObserver
      */
     public function sendNotificationToAdmin($notificationType)
     {
-        Notification::send(User::find(User::getAdminId()), $notificationType);
+        Notification::route('mail', config('skillbox.my_email'))->notify($notificationType);
     }
 }

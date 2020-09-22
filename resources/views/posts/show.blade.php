@@ -8,7 +8,8 @@
 	  {{ $post->title }}
  
   	@can('update', $post)
-   		| <a href="{{ route('posts.edit', ['post' => $post]) }}">Изменить</a>
+   		| <a href="@editPost($post)">Изменить</a>
+
    	@endcan
 	</h3>
 

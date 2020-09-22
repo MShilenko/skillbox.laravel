@@ -34,9 +34,26 @@ class AppServiceProvider extends ServiceProvider
         /** Add Observer for Post model */
         Post::observe(PostObserver::class);
 
+        Blade::directive('editPost', function ($post) {
+            $user = User::find(Auth::id());
+            $route = 'posts.edit';
+
+            if ($user->isAdmin()) {
+                $route = "admin.{$route}";
+            }
+
+            return "<?php echo route('{$route}', ['post' => {$post}]) ?>";
+        });
+
         /** Add custom if directive for blade templates */
         Blade::if('admin', function () {
-            return Auth::id() === User::getAdminId();
+            if (!Auth::check()) {
+                return false;
+            }
+
+            $user = User::find(Auth::id());
+
+            return $user->isAdmin();
         });
     }
 }

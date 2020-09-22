@@ -1,11 +1,10 @@
 <?php
 
-use App\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddUserIdToPosts extends Migration
+class CreateRolesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +13,10 @@ class AddUserIdToPosts extends Migration
      */
     public function up()
     {
-        Schema::table('posts', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('role', 100);
+            $table->timestamps();
         });
     }
 
@@ -26,8 +27,6 @@ class AddUserIdToPosts extends Migration
      */
     public function down()
     {
-        Schema::table('posts', function (Blueprint $table) {
-            $table->dropColumn(['user_id']);
-        });
+        Schema::dropIfExists('roles');
     }
 }

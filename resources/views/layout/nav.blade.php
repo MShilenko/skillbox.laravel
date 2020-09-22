@@ -8,7 +8,7 @@
 	  @endauth
 
 	  @admin
-	  	<a class="p-2 text-muted" href="{{ route('admin.feedbacks') }}">Админ</a>
+	  	<a class="p-2 text-muted" href="{{ route('admin.') }}">Админ</a>
 	  @endadmin  
   </nav>
 </div>
