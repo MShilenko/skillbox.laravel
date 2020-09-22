@@ -5,7 +5,6 @@ namespace App;
 use App\Interfaces\Commentable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class Post extends Model implements Commentable
 {
