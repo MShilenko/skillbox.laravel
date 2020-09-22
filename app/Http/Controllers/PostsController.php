@@ -6,6 +6,9 @@ use App\Post;
 use App\Service\Pushall;
 use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
+use App\Scopes\PostAndNewsIndexScope;
+use App\Service\AddCommentService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -20,9 +23,16 @@ class PostsController extends Controller
         $this->middleware('can:update,post')->except(['index', 'show', 'create', 'store']);
     }
 
+    protected static function booted()
+    {
+        static::addGlobalScope(new PostAndNewsIndexScope);
+    }
+
     public function index()
     {
-        $posts = Route::currentRouteName() === "admin.posts.index" ? Post::with('tags')->latest()->get() : Post::with('tags')->where('public', true)->latest()->get();
+       /** Пример вывода только нужных полей из основной и связанной моделей */
+        $perPage = config('skillbox.posts.paginate');
+        $posts = Post::where('public', true)->paginate($perPage);
 
         return view('posts.index', compact('posts'));
     }
@@ -51,12 +61,8 @@ class PostsController extends Controller
         $post = Post::create($validated);
 
         if ($request->tags){
-            $this->syncTags($post, $request->tags);
+            Tag::syncWithModel($post, $request->tags);
         }
-
-        push_all("Создана новая статья", "{$post->title} | {$post->created_at}");
-
-        flash('Статья успешно cоздана!');
 
         return redirect(route('main'));
     }
@@ -68,12 +74,8 @@ class PostsController extends Controller
         $post->update($validated);
 
         if ($request->tags){
-            $this->syncTags($post, $request->tags);
+            Tag::syncWithModel($post, $request->tags);
         }
-
-        push_all("Изменена статья", "{$post->title} | {$post->updated_at}");
-
-        flash('Статья успешно обновлена!');
 
         return redirect(route('posts.show', ['post' => $post]));
     }
@@ -85,17 +87,13 @@ class PostsController extends Controller
     public function destroy(Post $post){
         $post->delete();
 
-        flash('Статья удалена!', 'warning');
-
         return redirect(route('main'));
     }
 
-    public function syncTags(Post $post, string $tags)
+    public function comment(Request $request, Post $post) 
     {
-        foreach (explode(', ', $tags) as $tag) {
-            $tagsIds[] = Tag::firstOrCreate(['name' => $tag])->id;
-        }
+       AddCommentService::addComment($request, $post);
 
-        $post->tags()->sync(array_values($tagsIds));
+       return redirect()->route('posts.show', ['post' => $post]);
     }
 }

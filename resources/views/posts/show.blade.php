@@ -9,16 +9,45 @@
  
   	@can('update', $post)
    		| <a href="@editPost($post)">Изменить</a>
-
    	@endcan
 	</h3>
 
-	@include('posts.tags', ['tags' => $post->tags])
+	@include('layout.tags', ['tags' => $post->tags])
 
 	<div class="blog-post">
 	  <p class="blog-post-meta">Опубликовано: {{ $post->created_at }}</p>
 	  {{ $post->text }}
 	</div><!-- /.blog-post -->
+
+	@include('layout.forms.comment', ['route' => 'post.comment.store', 'post' => ['post' => $post]])	
+
+	@if ($post->comments()->exists())
+		@include('layout.comments', ['comments' => $post->comments])
+	@endif
+
+	@admin
+		<hr>
+
+		<h2>История изменений</h2>
+
+		@forelse($post->history as $item)
+			<p>Автор: {{ $item->name }}</p>
+			<p>Дата изменения: {{ $item->pivot->created_at->diffForHumans() }}</p>
+			<p>Затронутые поля:</p>
+			<table class="table">
+				<tbody>
+					@foreach($item->pivot->changes as $key => $item)
+						<tr>
+							<td>{{ $key }}</td>
+							<td>{{ $item }}</td>
+						</tr>
+					@endforeach
+				</tbody>
+			</table>
+		@empty
+			<p>Статья еще не изменялась.</p>
+		@endforelse
+	@endadmin	
 
 	<nav class="blog-pagination">
 	  <a class="btn btn-outline-primary" href="{{ route('main') }}">Вернуться на главную</a>

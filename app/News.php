@@ -4,9 +4,9 @@ namespace App;
 
 use App\Interfaces\Commentable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
-class Post extends Model implements Commentable
+class News extends Model implements Commentable
 {
     protected $fillable = ['title', 'slug', 'excerpt', 'public', 'text', 'tags', 'user_id'];
 
@@ -16,15 +16,6 @@ class Post extends Model implements Commentable
     public function getRouteKeyName()
     {
         return 'slug';
-    }
-
-    protected static function booted() 
-    {
-        static::updating(function ($post) {
-            $post->history()->attach(Auth::id(), [
-                'changes' => json_encode($post->getDirty()),
-            ]);
-        });
     }
 
     public function tags()
@@ -40,10 +31,5 @@ class Post extends Model implements Commentable
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable');
-    }
-
-    public function history()
-    {
-        return $this->belongsToMany(User::class, 'post_histories')->using(PostHistory::class)->withPivot(['changes', 'created_at']);
     }
 }

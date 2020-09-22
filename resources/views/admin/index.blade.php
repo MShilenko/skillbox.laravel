@@ -10,6 +10,7 @@
 
 	<ul>
 		<li><a href="{{ route('admin.posts.index') }}">Статьи</a></li>
+		<li><a href="{{ route('admin.news') }}">Новости</a> | <a href="{{ route('admin.news.create') }}">Создать</a></li>
 		<li><a href="{{ route('admin.feedbacks') }}">Обращения</a></li>
 	</ul>
 
