@@ -6,11 +6,16 @@
 
 	<h3 class="pb-3 mb-4 font-italic border-bottom">
 	  {{ $post->title }}
+ 
+  	@can('update', $post)
+   		| <a href="{{ route('posts.edit', ['post' => $post]) }}">Изменить</a>
+   	@endcan
 	</h3>
+
+	@include('posts.tags', ['tags' => $post->tags])
 
 	<div class="blog-post">
 	  <p class="blog-post-meta">Опубликовано: {{ $post->created_at }}</p>
-
 	  {{ $post->text }}
 	</div><!-- /.blog-post -->
 

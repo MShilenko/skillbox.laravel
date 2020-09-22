@@ -3,14 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Post;
-use App\Http\Requests\StorePost;
+use App\Tag;
+use App\Http\Requests\StoreAndUpdatePost;
 use Illuminate\Http\Request;
 
 class PostsController extends Controller
 {
+    public function __construct()
+    {
+        /** middleware "из коробки" - указывает что доступ к указанным методам разрешен только зарегистрированным пользователям */
+        $this->middleware('auth')->only(['store', 'update', 'edit', 'destroy', 'create']);
+
+        /** Политики: в данном случае указано что для всех, кроме перечисленных методов, должна происходить проверка указанная в \App\Policies\PostPolicy:update */
+        $this->middleware('can:update,post')->except(['index', 'show', 'create', 'store']);
+    }
+
     public function index()
     {
-        return view('posts.index', ['posts' => Post::latest()->get()]);
+        return view('posts.index', ['posts' => Post::with('tags')->latest()->get()]);
     }
 
     /**
@@ -28,13 +38,56 @@ class PostsController extends Controller
         return view('posts.create');
     }
 
-    public function store(StorePost $request)
+    public function store(StoreAndUpdatePost $request)
     {
         $validated = $request->validated();
         $validated['public'] = (bool) $request->input('public');
+        $validated['user_id'] = \Auth::id();
 
-        Post::create($validated);
+        $post = Post::create($validated);
+
+        if ($request->tags){
+            $this->syncTags($post, $request->tags);
+        }
+
+        flash('Статья успешно cоздана!');
 
         return redirect(route('main'));
+    }
+
+    public function update(StoreAndUpdatePost $request, Post $post)
+    {
+        $validated = $request->validated();
+
+        $post->update($validated);
+
+        if ($request->tags){
+            $this->syncTags($post, $request->tags);
+        }
+
+        flash('Статья успешно обновлена!');
+
+        return redirect(route('posts.show', ['post' => $post]));
+    }
+
+    public function edit(Post $post){
+        return view('posts.edit', compact('post'));
+    }
+
+    public function destroy(Post $post){
+        $post->delete();
+
+        flash('Статья удалена!', 'warning');
+
+        return redirect(route('main'));
+    }
+
+    public function syncTags(Post $post, string $tags)
+    {
+        foreach (explode(', ', $tags) as $tag) {
+            $tagsIds[] = Tag::firstOrCreate(['name' => $tag])->id;
+        }
+
+        $post->tags()->sync(array_values($tagsIds));
     }
 }

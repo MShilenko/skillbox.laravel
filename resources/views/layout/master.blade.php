@@ -18,7 +18,9 @@
 
         @include('layout.text')
 
-        @include('layout.sidebar')
+        @section('sidebar')
+          @include('layout.sidebar')
+        @show
 
       </div><!-- /.row -->
     </main><!-- /.container -->
