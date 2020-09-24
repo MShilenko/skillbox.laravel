@@ -40,6 +40,12 @@ class StatisticController extends Controller
         /** Самая обсуждаемая статья */
         $statistics['most_commented_post'] = Post::select(['title', 'slug'])->withCount('comments')->orderBy('comments_count', 'desc')->first();
 
+        if (!Cache::tags("statistics")->has("statistics")) {
+            Cache::tags("statistics")->put("statistics", $statistics, config('skillbox.cache.time'));    
+        }
+
+        $statistics = Cache::tags("statistics")->get("statistics", $statistics);
+
         return view('statistic', compact('statistics'));
     }
 }

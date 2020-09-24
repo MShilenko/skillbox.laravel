@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Post;
-use App\Service\Pushall;
-use App\Tag;
 use App\Http\Requests\StoreAndUpdatePost;
+use App\Post;
 use App\Scopes\PostAndNewsIndexScope;
 use App\Service\AddCommentService;
+use App\Tag;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 
 class PostsController extends Controller
 {
@@ -30,9 +29,20 @@ class PostsController extends Controller
 
     public function index()
     {
-       /** Пример вывода только нужных полей из основной и связанной моделей */
-        $perPage = config('skillbox.posts.paginate');
-        $posts = Post::where('public', true)->paginate($perPage);
+        $posts = Cache::tags('posts')->remember('posts', config('skillbox.cache.time'), function () {
+            /** Пример вывода только нужных полей из основной и связанной моделей */
+            $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
+            $perPage = config('skillbox.posts.paginate');
+            return Post::select($rows)
+                ->with([
+                    'tags' => function ($tag) {
+                        $tag->select(['id', 'name']);
+                    },
+                ])
+                ->latest()
+                ->where('public', true)
+                ->paginate($perPage);
+        });
 
         return view('posts.index', compact('posts'));
     }
@@ -44,6 +54,12 @@ class PostsController extends Controller
      */
     public function show(Post $post)
     {
+        if (!Cache::tags(["post|{$post->id}"])->has("post|{$post->id}")) {
+            Cache::tags(["post|{$post->id}"])->put("post|{$post->id}", $post, config('skillbox.cache.time'));
+        }
+
+        $post = Cache::tags(["post|{$post->id}"])->get("post|{$post->id}", $post);
+
         return view('posts.show', compact('post'));
     }
 
@@ -60,7 +76,7 @@ class PostsController extends Controller
 
         $post = Post::create($validated);
 
-        if ($request->tags){
+        if ($request->tags) {
             Tag::syncWithModel($post, $request->tags);
         }
 
@@ -73,27 +89,29 @@ class PostsController extends Controller
 
         $post->update($validated);
 
-        if ($request->tags){
+        if ($request->tags) {
             Tag::syncWithModel($post, $request->tags);
         }
 
         return redirect(route('posts.show', ['post' => $post]));
     }
 
-    public function edit(Post $post){
+    public function edit(Post $post)
+    {
         return view('posts.edit', compact('post'));
     }
 
-    public function destroy(Post $post){
+    public function destroy(Post $post)
+    {
         $post->delete();
 
         return redirect(route('main'));
     }
 
-    public function comment(Request $request, Post $post) 
+    public function comment(Request $request, Post $post)
     {
-       AddCommentService::addComment($request, $post);
+        AddCommentService::addComment($request, $post);
 
-       return redirect()->route('posts.show', ['post' => $post]);
+        return redirect()->route('posts.show', ['post' => $post]);
     }
 }

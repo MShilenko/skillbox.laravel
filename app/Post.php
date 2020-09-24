@@ -4,6 +4,7 @@ namespace App;
 
 use App\Interfaces\Commentable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 
 class Post extends Model implements Commentable
@@ -20,6 +21,23 @@ class Post extends Model implements Commentable
 
     protected static function booted() 
     {
+        static::updated(function($model) {
+            Cache::tags(["posts", "post|{$model->id}", "posts_tags", "tags_cloud", "statistics"])->flush();
+            push_all("Изменена статья", "{$model->title} | {$model->updated_at}");
+            flash('Статья успешно обновлена!');
+        });
+
+        static::created(function($model) {
+            Cache::tags(["posts", "posts_tags", "tags_cloud", "statistics"])->flush();
+            push_all("Создана новая статья", "{$model->title} | {$model->created_at}");
+            flash('Статья успешно cоздана!');
+        });
+
+        static::deleted(function($model) {
+            Cache::tags(["posts", "post|{$model->id}", "posts_tags", "tags_cloud", "statistics"])->flush();
+            flash('Статья удалена!', 'warning');
+        });
+
         static::updating(function ($post) {
             $post->history()->attach(Auth::id(), [
                 'changes' => json_encode($post->getDirty()),
