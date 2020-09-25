@@ -14,7 +14,7 @@ class AdminPostsController extends PostsController
 
     public function index()
     {
-        $posts = Cache::tags('posts')->remember('posts', config('skillbox.cache.time'), function () {
+        $posts = Cache::tags('posts')->remember('admin.posts', config('skillbox.cache.time'), function () {
             /** Пример вывода только нужных полей из основной и связанной моделей */
             $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
             $perPage = config('skillbox.posts.paginate');

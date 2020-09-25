@@ -38,18 +38,18 @@ class NewsController extends Controller
         return view('news.index', compact('news'));
     }
 
-    /**
+     /**
      * Получаем коллекцию(одну конкретную запись БД), Laravel сам находит нужную по id(или другому полю БД, переопределить поле можно в контроллере)
-     * @param  News   $news
+     * @param  string $slug
      * @return view
      */
-    public function show(News $news)
+    public function show(string $slug)
     {
-        if (!Cache::tags(["news|{$news->id}"])->has("news|{$news->id}")) {
-            Cache::tags(["news|{$news->id}"])->put("news|{$news->id}", $news, config('skillbox.cache.time'));
+        if (!Cache::tags(["news|{$slug}"])->has("news|{$slug}")) {
+            Cache::tags(["news|{$slug}"])->put("news|{$slug}", News::where('slug', $slug)->firstOrFail(), config('skillbox.cache.time'));
         }
 
-        $news = Cache::tags(["news|{$news->id}"])->get("news|{$news->id}", $news);
+        $news = Cache::tags(["news|{$slug}"])->get("news|{$slug}");
 
         return view('news.show', compact('news'));
     }

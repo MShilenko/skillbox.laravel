@@ -49,16 +49,16 @@ class PostsController extends Controller
 
     /**
      * Получаем коллекцию(одну конкретную запись БД), Laravel сам находит нужную по id(или другому полю БД, переопределить поле можно в контроллере)
-     * @param  Post   $post
+     * @param  string $slug
      * @return view
      */
-    public function show(Post $post)
+    public function show(string $slug)
     {
-        if (!Cache::tags(["post|{$post->id}"])->has("post|{$post->id}")) {
-            Cache::tags(["post|{$post->id}"])->put("post|{$post->id}", $post, config('skillbox.cache.time'));
+        if (!Cache::tags(["post|{$slug}"])->has("post|{$slug}")) {
+            Cache::tags(["post|{$slug}"])->put("post|{$slug}", Post::where('slug', $slug)->firstOrFail(), config('skillbox.cache.time'));
         }
 
-        $post = Cache::tags(["post|{$post->id}"])->get("post|{$post->id}", $post);
+        $post = Cache::tags(["post|{$slug}"])->get("post|{$slug}");
 
         return view('posts.show', compact('post'));
     }

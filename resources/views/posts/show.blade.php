@@ -29,7 +29,7 @@
 		<hr>
 
 		<h2>История изменений</h2>
-
+		
 		@forelse($post->history as $item)
 			<p>Автор: {{ $item->name }}</p>
 			<p>Дата изменения: {{ $item->pivot->created_at->diffForHumans() }}</p>

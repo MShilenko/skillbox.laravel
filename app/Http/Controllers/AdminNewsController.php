@@ -14,10 +14,10 @@ class AdminNewsController extends NewsController
 
     public function index()
     {
-        $news = Cache::tags('news')->remember('news', config('skillbox.cache.time'), function () {
+        $news = Cache::tags('news')->remember('admin.news', config('skillbox.cache.time'), function () {
             /** Пример вывода только нужных полей из основной и связанной моделей */
             $rows = ['id', 'title', 'slug', 'created_at', 'excerpt'];
-            $perPage = config('skillbox.newss.paginate');
+            $perPage = config('skillbox.post.paginate');
             return News::select($rows)->with([
                 'tags' => function ($tag) {
                     $tag->select(['id', 'name']);
