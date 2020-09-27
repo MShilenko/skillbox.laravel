@@ -40,7 +40,7 @@ class Post extends Model implements Commentable
 
         static::updating(function ($post) {
             $post->history()->attach(Auth::id(), [
-                'changes' => json_encode($post->getDirty()),
+                'changes' => $post->getDirty(),
             ]);
         });
     }
