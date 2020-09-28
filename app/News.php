@@ -18,6 +18,24 @@ class News extends Model implements Commentable
         return 'slug';
     }
 
+    protected static function booted() 
+    {
+        static::updated(function($model) {
+            Cache::tags(["news", "admin.news", "news|{$model->slug}", "posts_tags", "tags_cloud", "statistics"])->flush();
+            flash('Новость успешно обновлена!');
+        });
+
+        static::created(function($model) {
+            Cache::tags(["posts", "admin.news", "posts_tags", "tags_cloud", "statistics"])->flush();
+            flash('Новость успешно cоздана!');
+        });
+
+        static::deleted(function($model) {
+            Cache::tags(["news", "admin.news", "news|{$model->slug}", "posts_tags", "tags_cloud", "statistics"])->flush();
+            flash('Новость удалена!', 'warning');
+        });
+    }
+
     public function tags()
     {
         return $this->morphToMany(Tag::class, 'taggable');
